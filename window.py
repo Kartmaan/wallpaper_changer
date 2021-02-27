@@ -77,7 +77,7 @@ class Ui_mainWindow(object):
 
         # Label step 2
         self.label_step_2 = QtWidgets.QLabel(self.frame_timer)
-        self.label_step_2.setGeometry(QtCore.QRect(50, 0, 201, 51))
+        self.label_step_2.setGeometry(QtCore.QRect(65, 0, 201, 51))
         self.label_step_2.setText("Step 2 : Choose a timer")
         font.setPointSize(12)
         self.label_step_2.setFont(font)
@@ -116,8 +116,8 @@ class Ui_mainWindow(object):
 
         # Label info timer
         self.label_info_timer = QtWidgets.QLabel(self.frame_info_timer)
-        self.label_info_timer.setText("Next wallpaper in : 00:02:32\n\n"+
-        "Displayed : 4")
+        self.label_info_timer.setText("Next wallpaper in : 00:00\n\n"+
+        "Displayed : 0")
         self.label_info_timer.setGeometry(QtCore.QRect(10, 10, 251, 91))
         font = QtGui.QFont()
         font.setPointSize(11)

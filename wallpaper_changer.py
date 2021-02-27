@@ -1,6 +1,5 @@
 import sys
 import os
-#import glob
 import random
 import threading
 import time
@@ -12,6 +11,7 @@ from PyQt5.QtWidgets import QFileDialog
 from window import Ui_mainWindow
 
 directory = ""
+displayed = 0
 run = False
 
 class MainWindow(QtWidgets.QMainWindow, Ui_mainWindow):
@@ -20,49 +20,62 @@ class MainWindow(QtWidgets.QMainWindow, Ui_mainWindow):
         self.setupUi(self)
 
         self.frame_timer.setEnabled(False)
+        self.button_run_stop.setEnabled(False)
+
         self.button_run_stop.clicked.connect(self.run_button)
         self.button_browse.clicked.connect(self.browse)
         self.img_led.setEnabled(False)
 
     def run_button(self):
-        global run
+        global run, displayed
 
         if (self.button_run_stop.text() == "RUN"):
-            #print(self.timer_box.text()+self.comboBox_unit.currentText())
             run = True
             self.img_led.setEnabled(True)
             self.button_run_stop.setText("STOP")
+            self.label_status.setText("")
+
+            self.frame_browse.setEnabled(False)
+
             thd_countdown = threading.Thread(target=self.countdown)
             thd_countdown.start()
-            #print(111)
 
         else :
             run = False
             self.img_led.setEnabled(False)
             self.button_run_stop.setText("RUN")
-            #print(333)
+            displayed = 0
+            self.label_info_timer.setText(f"{'00:00'} \n\nDisplayed : {displayed}" )
+
+            self.frame_browse.setEnabled(True)
 
     def browse(self):
         global directory
 
-        #fname = QFileDialog.getOpenFileName(self, 'Open file','c:\\',
-        #"Image files (*.jpg *.png)")
         fname = QFileDialog()
         fname.setFileMode(QFileDialog.Directory)
         fname.setOption(QFileDialog.ShowDirsOnly, True)
-        #fname.setFilter("Image files (*.jpg)")
-        #fname.exec()
         directory = fname.getExistingDirectory() # Get the choosen dir
         directory = os.path.normpath(directory)
-        #imgCounter = len(glob.glob1(directory,"*.jpg"))
-        #imgCounter = imgCounter + len(glob.glob1(directory,"*.png"))
+
+        if self.imgCount() <= 1:
+            self.label_status.setText("Not enough images in the selected directory")
+            self.frame_timer.setEnabled(False)
+            self.button_run_stop.setEnabled(False)
+
+            self.label_info_browse.setText(
+            f"Path : {directory}\n\nImages found = {self.imgCount()}")
+
+            return None
+
+        else :
+            self.label_status.setText("")
 
         self.label_info_browse.setText(
             f"Path : {directory}\n\nImages found = {self.imgCount()}")
         
         self.frame_timer.setEnabled(True)
-        
-        #self.wallpaperize(directory)
+        self.button_run_stop.setEnabled(True)
     
     def imgCount(self):
         global directory
@@ -76,7 +89,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_mainWindow):
         return imgs
     
     def countdown(self):
-        global directory
+        global directory, displayed, run
 
         t_init = int(self.timer_box.text())
         t = t_init
@@ -89,24 +102,42 @@ class MainWindow(QtWidgets.QMainWindow, Ui_mainWindow):
             while t and run == True:
                 mins, secs = divmod(t, 60)
                 timer = 'Next wallpaper in : {:02d}:{:02d}'.format(mins, secs)
-                self.label_info_timer.setText(f"{timer} \n\nDisplayed : 4" )
-                #print(timer, end="\r")
+                self.label_info_timer.setText(f"{timer} \n\nDisplayed : {displayed}" )
                 time.sleep(1)
                 t -= 1
-            self.wallpaperize(directory)
-            print("FINISH")
+            if run:
+                self.wallpaperize(directory)
+            #print("FINISH")
             t = t_init
 
 
     def wallpaperize(self, path):
-        x = random.choice(os.listdir(path))
+        global displayed, run
+        i = 0
+
+        while True:
+            x = random.choice(os.listdir(path))
+            # print(x)
+
+            if i > 50:
+                run = False
+                self.label_status.setText("Not enough images in the selected directory")
+                self.button_run_stop.setText("RUN")
+                self.img_led.setEnabled(True)
+                return None
+
+            if x.endswith(".jpg") or x.endswith(".jpeg") or x.endswith(".png"):
+                break
+
+            else:
+                i+=1
+                print("Not an image")
+                continue
 
         path = os.path.join(path, x)
-        #target = f"{path}\\{x}"
-        #target = target.replace("/", "\\")
-        #print(path)
         set_wallpaper(path)
-
+        displayed += 1
+        
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     main_window = MainWindow()
