@@ -60,8 +60,9 @@ class Ui_mainWindow(object):
         # Label info browse
         self.label_info_browse = QtWidgets.QLabel(self.frame_info_browse)
         self.label_info_browse.setGeometry(QtCore.QRect(10, 10, 251, 91))
-        self.label_info_browse.setText("Path : C:\\users\\bob\\pictures\n\n"+
-        "Images found : 42")
+        self.label_info_browse.setWordWrap(True)
+        self.label_info_browse.setText("Path : ...\n\n"+
+        "Images found : ...")
         self.label_info_browse.setAlignment(QtCore.Qt.AlignCenter)
 
         # Frame timer
@@ -84,6 +85,7 @@ class Ui_mainWindow(object):
         # Timer box
         self.timer_box = QtWidgets.QSpinBox(self.frame_timer)
         self.timer_box.setGeometry(QtCore.QRect(100, 130, 71, 41))
+        self.timer_box.setMinimum(1)
         font = QtGui.QFont()
         font.setPointSize(18)
         self.timer_box.setFont(font)
@@ -142,7 +144,7 @@ class Ui_mainWindow(object):
         # Label status
         self.label_status = QtWidgets.QLabel(self.centralwidget)
         self.label_status.setGeometry(QtCore.QRect(10, 470, 781, 21))
-        self.label_status.setText("Status message")
+        self.label_status.setText("")
         font = QtGui.QFont()
         font.setPointSize(10)
         self.label_status.setFont(font)
