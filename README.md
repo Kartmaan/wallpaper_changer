@@ -19,3 +19,7 @@ Note : if the directory does not contain images, or too few (at least 2), the pr
 
 ## The process is launched
 ![cap2](https://user-images.githubusercontent.com/11463619/109429963-04423000-79ff-11eb-9e0a-802e1452e4bb.png)
+
+# Requirements
+- `PyQt5`
+- `py-wallpaper`
