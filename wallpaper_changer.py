@@ -133,7 +133,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_mainWindow):
                 t -= 1
             if run:
                 self.wallpaperize(directory) # Change the wallpaper
-            t = t_init
+
+            # Countdown reset
+            if unit == "Min.":
+                t = t_init * 60
+            else:
+                t = t_init
 
     def wallpaperize(self, path):
         """Randomly choose an image from the directory 
