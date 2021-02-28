@@ -10,8 +10,12 @@ from PyQt5.QtWidgets import QFileDialog
 
 from window import Ui_mainWindow
 
-directory = ""
-displayed = 0
+__title__ = 'Wallpaper Changer'
+__author__ = 'Kartmaan'
+__version__ = '1.0'
+
+directory = "" # Choosen directory
+displayed = 0 # Wallpaper displayed
 run = False
 
 class MainWindow(QtWidgets.QMainWindow, Ui_mainWindow):
@@ -19,27 +23,35 @@ class MainWindow(QtWidgets.QMainWindow, Ui_mainWindow):
         super().__init__()
         self.setupUi(self)
 
+        # Buttons connection to their function
+        self.button_run_stop.clicked.connect(self.runStop_button)
+        self.button_browse.clicked.connect(self.browse)
+
         self.frame_timer.setEnabled(False)
         self.button_run_stop.setEnabled(False)
-
-        self.button_run_stop.clicked.connect(self.run_button)
-        self.button_browse.clicked.connect(self.browse)
         self.img_led.setEnabled(False)
 
-    def run_button(self):
+    def runStop_button(self):
+        """ Run/Stop button behaviour
+        A single button is used to start and stop the process"""
+
         global run, displayed
 
+        # The process is not running
+        # User wants to RUN the process
         if (self.button_run_stop.text() == "RUN"):
             run = True
             self.img_led.setEnabled(True)
             self.button_run_stop.setText("STOP")
             self.label_status.setText("")
-
             self.frame_browse.setEnabled(False)
 
+            # Countdown thread
             thd_countdown = threading.Thread(target=self.countdown)
             thd_countdown.start()
 
+        # The process is running
+        # User wants to STOP the process
         else :
             run = False
             self.img_led.setEnabled(False)
@@ -50,14 +62,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_mainWindow):
             self.frame_browse.setEnabled(True)
 
     def browse(self):
+        """ 'Browse...' button behaviour.
+        OS opens window allowing the user to choose a directory 
+        containing images. """
+
         global directory
 
         fname = QFileDialog()
-        fname.setFileMode(QFileDialog.Directory)
+        fname.setFileMode(QFileDialog.Directory) # Directory mode
         fname.setOption(QFileDialog.ShowDirsOnly, True)
         directory = fname.getExistingDirectory() # Get the choosen dir
-        directory = os.path.normpath(directory)
+        directory = os.path.normpath(directory) # Standardize syntax
 
+        # The chosen folder must contain at least two images 
+        # to unlock the next step and thus being able 
+        # to start the process
         if self.imgCount() <= 1:
             self.label_status.setText("Not enough images in the selected directory")
             self.frame_timer.setEnabled(False)
@@ -78,6 +97,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_mainWindow):
         self.button_run_stop.setEnabled(True)
     
     def imgCount(self):
+        """Counts the number of images in the directory chosen 
+        by the user"""
+
         global directory
 
         imgs = len([f for f in os.listdir(directory)
@@ -86,9 +108,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_mainWindow):
         or f.endswith('png')
         and os.path.isfile(os.path.join(directory, f))])
 
-        return imgs
+        return imgs # Number of images <int>
     
     def countdown(self):
+        """Countdown set by the user to periodically 
+        change the wallpaper. 
+        This function is started in a thread"""
+
         global directory, displayed, run
 
         t_init = int(self.timer_box.text())
@@ -106,12 +132,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_mainWindow):
                 time.sleep(1)
                 t -= 1
             if run:
-                self.wallpaperize(directory)
-            #print("FINISH")
+                self.wallpaperize(directory) # Change the wallpaper
             t = t_init
 
-
     def wallpaperize(self, path):
+        """Randomly choose an image from the directory 
+        chosen by the user and set it as wallpaper"""
+
         global displayed, run
         i = 0
 
@@ -119,6 +146,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_mainWindow):
             x = random.choice(os.listdir(path))
             # print(x)
 
+            # After a certain number of attempts without 
+            # finding an image, the process stops
             if i > 50:
                 run = False
                 self.label_status.setText("Not enough images in the selected directory")
@@ -126,14 +155,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_mainWindow):
                 self.img_led.setEnabled(True)
                 return None
 
+            # Extensions sought
             if x.endswith(".jpg") or x.endswith(".jpeg") or x.endswith(".png"):
                 break
-
+            
+            # Not an image, try again
             else:
                 i+=1
                 print("Not an image")
                 continue
-
+        
+        # Image found
         path = os.path.join(path, x)
         set_wallpaper(path)
         displayed += 1
