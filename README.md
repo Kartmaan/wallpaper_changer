@@ -1,5 +1,6 @@
 # Wallpaper_changer
 Wallpaper Changer is a graphical interface designed with PyQt5 which allows to periodically change the wallpaper. 
+
 (For Windows)
 
 # How does the program work ?
