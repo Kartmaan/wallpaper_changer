@@ -24,4 +24,4 @@ Note : if the directory does not contain images, or too few (at least 2), the pr
 
 # Requirements
 - `PyQt5`
-- `py-wallpaper` (Only compatible with Windows)
+- `py-wallpaper` (Only compatible with Windows and Mac)
